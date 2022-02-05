@@ -41,8 +41,8 @@ Commands:
 
 ## Features
 
-For now, fgen only allows to create for example : 
+For now, `fgen` only has features like : 
 
-* A unique email
-* A list of `n` emails
-* Copying output (only for Macos and Linux users), help wanted since I can't have access to a windows environment.
+* Generate unique fake data
+* Generate a list of `n` records of the fake data
+* Copy the output of the fake data generated
