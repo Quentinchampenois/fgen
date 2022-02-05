@@ -45,4 +45,4 @@ For now, `fgen` only has features like :
 
 * Generate unique fake data
 * Generate a list of `n` records of the fake data
-* Copy the output of the fake data generated
+* Copy the output of the fake data generated directly in your clipboard
