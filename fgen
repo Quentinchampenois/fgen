@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+
+require "thor"
+require "faker"
+require "os"
+
+class Fakegen < Thor
+  HIDE_COPY_OPTION = if OS.mac? || OS.linux?
+                       false
+                     else
+                       true
+                     end
+
+  desc "name", "Returns a fake name"
+  option :limit, :type => :numeric, :banner => "Limit option that allows to define the number of names to return", :aliases => :l
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def name
+    execution("name", options)
+  end
+
+  desc "email", "Returns a fake email"
+  option :limit, :type => :numeric, :banner => "Limit option that allows to define the number of emails to return", :aliases => :l
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def email
+    execution("email", options)
+  end
+
+  desc "profile", "Returns a fake profile"
+  option :limit, :type => :numeric, :banner => "Limit option that allows to define the number of profiles to return", :aliases => :l
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def profile
+    execution("profile", options)
+  end
+
+  desc "image", "Returns a fake image"
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def image
+    execution("image", options)
+  end
+
+  desc "text", "Returns a fake text"
+  option :limit, :type => :numeric, :banner => "Limit option that allows to define the number of texts to return", :aliases => :l
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def text
+    puts Faker::Lorem.sentence(word_count: options[:limit] || 100)
+  end
+
+  desc "question", "Returns a fake question"
+  option :limit, :type => :numeric, :banner => "Limit option that allows to define the number of questions to return", :aliases => :l
+  option :copy, :type => :boolean, :banner => "Copy output in clipboard : Only for MacOS and Linux user", :aliases => :c, hide: HIDE_COPY_OPTION
+
+  def question
+    execution("question", options)
+  end
+
+  private
+
+  def faker_name
+    Faker::Name.name
+  end
+
+  def faker_email
+    Faker::Internet.email
+  end
+
+  def faker_question
+    Faker::Lorem.question
+  end
+
+  def faker_image
+    Faker::LoremFlickr.colorized_image(size: "320x240", color: 'red', search_terms: ['sports', 'fitness'], match_all: true)
+  end
+
+  def faker_profile
+    age = rand(10...99)
+    {
+      name: faker_name,
+      age: age,
+      birth_date: Faker::Date.birthday(min_age: age, max_age: age).strftime("%d-%m-%Y"),
+      job: Faker::Job.title,
+      phone: Faker::PhoneNumber.phone_number_with_country_code,
+      description: Faker::Quotes::Shakespeare.hamlet_quote
+    }
+  end
+
+  # Returns an array of elements
+  # Array length is defined by param limit
+  # Param method is a String, it must be equal to a defined method
+  def list(limit, method)
+    results = []
+    limit.times { results << send(method) }
+    results
+  end
+
+  def invoker(method, options)
+    tmp_method = build_method method
+    if options[:limit].nil? || !options[:limit].positive?
+      return [send(tmp_method)]
+    end
+
+    list(options[:limit].to_i, tmp_method)
+  end
+
+  def execution(method, options)
+    copy_sh_cmd = if OS.linux?
+                    "xsel –clipboard –input"
+                  elsif OS.mac?
+                    "pbcopy"
+                  end
+
+    puts invoker(method, options) if options[:copy].nil? || !options[:copy] || copy_sh_cmd.nil?
+    return if options[:copy].nil? || !options[:copy]
+
+    IO.popen(copy_sh_cmd, 'r+') do |pipe|
+      pipe.puts invoker(method, options)
+    end
+  end
+
+  def build_method(method)
+    "faker_#{method}"
+  end
+
+end
+
+Fakegen.start(ARGV)
