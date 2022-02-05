@@ -23,6 +23,22 @@ gem install os
 ./fgen 
 ```
 
+### Available for now
+
+This is the fake data generable for now, it will grow in future
+
+
+```bash
+Commands:
+  fgen email           # Returns a fake email
+  fgen help [COMMAND]  # Describe available commands or one specific command
+  fgen image           # Returns a fake image
+  fgen name            # Returns a fake name
+  fgen profile         # Returns a fake profile
+  fgen question        # Returns a fake question
+  fgen text            # Returns a fake text
+```
+
 ## Features
 
 For now, fgen only allows to create for example : 
